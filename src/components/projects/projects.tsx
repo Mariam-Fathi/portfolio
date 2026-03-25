@@ -49,6 +49,16 @@ const FileIcon = ({ ext }: { ext?: string }) => (
 
 const projects: Project[] = [
   {
+    id: "kai-app",
+    title: "Kai",
+    role: "Full-Stack Engineer",
+    description:
+      "Kai is a production full-stack web app for a structured 60-day, voice-first English speaking program aimed at learners who over-rely on translation. The curriculum spans eight themed weeks: weeks 1–4 use blocked practice (deep repetition on one concept per week), and weeks 5–8 shift to interleaved practice that mixes prior chunks in new contexts for durable retrieval. Each ~15-minute daily session runs four timed phases—chunk drilling (explicit instruction and multi-context practice), the 4/3/2 technique (same topic repeated three times with decreasing time limits, scaled by week), open production scenarios with direct native-model feedback, and a short wrap with a concrete takeaway and rehearsal cue. The AI coach (Google Gemini) is invoked only from a server-side `/api/kai` route with configurable model selection, automatic fallback across model IDs, and retry handling for rate limits—keeping API keys off the client. The client parses structured coach signals to maintain phrase memory with spaced repetition (1/3/7/14/30-day intervals), tracks per-phrase recall and misses, and persists day index, session date, and memory in localStorage, with a one-session-per-day design. Users can speak via the Web Speech API (browser speech recognition) or type; assistant replies are read aloud with speech synthesis, with phase progression, elapsed time, and multi-bar progress UI throughout. Built with React Router 7 (SSR-capable stack), Vite, TypeScript, and Tailwind CSS v4; deployed on Vercel.",
+    links: [
+      { name: "Live", url: "https://kai-app-six.vercel.app/" },
+    ],
+  },
+  {
     id: "sales-ai",
     title: "Estima",
     role: "Full-Stack Engineer",
@@ -153,6 +163,7 @@ const projects: Project[] = [
     ],
   },
 
+
 ];
 
 // Color palette: [6A0610, 8A9EA7, F9E7C9, 280B0B]
@@ -238,6 +249,15 @@ export const cardPalette = [
     body: "#280B0B",
     link: "#6A0610",
     accent: "#8A9EA7",
+  },
+  {
+    // Project 10: Kai
+    background: "#8A9EA7",
+    headline: "#280B0B",
+    headlineStroke: "#280B0B",
+    body: "#280B0B",
+    link: "#280B0B",
+    accent: "#6A0610",
   },
 ];
 
