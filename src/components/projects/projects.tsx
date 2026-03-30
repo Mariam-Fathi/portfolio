@@ -18,14 +18,8 @@ type Project = {
   links: ProjectLink[];
 };
 
-type ProjectsProps = {
-  scrollContainer?: HTMLDivElement | null;
-};
-
 const extColors: Record<string, string> = {
-  fig: "#a78bfa", ai: "#fb923c", pdf: "#f87171", jpg: "#34d399", md: "#60a5fa",
-  jsx: "#38bdf8", js: "#fbbf24", css: "#c084fc", mp4: "#f472b6", zip: "#94a3b8",
-  txt: "#8A9EA7", link: "#6A0610",
+  link: "#6A0610",
 };
 
 const FolderIcon = ({ open }: { open: boolean }) => (
@@ -166,131 +160,6 @@ const projects: Project[] = [
 
 ];
 
-// Color palette: [6A0610, 8A9EA7, F9E7C9, 280B0B]
-// One palette per project (index matches project order). Exported for use in Certificates.
-export const cardPalette = [
-  {
-    // Project 0: Estima
-    background: "#8A9EA7",
-    headline: "#280B0B",
-    headlineStroke: "#280B0B",
-    body: "#280B0B",
-    link: "#280B0B",
-    accent: "#6A0610",
-  },
-  {
-    // Project 1: Font Selection Agent
-    background: "#F9E7C9",
-    headline: "#6A0610",
-    headlineStroke: "#6A0610",
-    body: "#280B0B",
-    link: "#6A0610",
-    accent: "#8A9EA7",
-  },
-  {
-    // Project 2: Homi
-    background: "#8A9EA7",
-    headline: "#280B0B",
-    headlineStroke: "#280B0B",
-    body: "#280B0B",
-    link: "#280B0B",
-    accent: "#6A0610",
-  },
-  {
-    // Project 3: Real Estate Data Auditing
-    background: "#6A0610",
-    headline: "#F9E7C9",
-    headlineStroke: "#F9E7C9",
-    body: "#F9E7C9",
-    link: "#F9E7C9",
-    accent: "#8A9EA7",
-  },
-  {
-    // Project 4: Multimodal Personality Analysis (distinct from project 3)
-    background: "#8A9EA7",
-    headline: "#280B0B",
-    headlineStroke: "#280B0B",
-    body: "#280B0B",
-    link: "#280B0B",
-    accent: "#6A0610",
-  },
-  {
-    // Project 5: Sanayat
-    background: "#F9E7C9",
-    headline: "#6A0610",
-    headlineStroke: "#6A0610",
-    body: "#280B0B",
-    link: "#6A0610",
-    accent: "#8A9EA7",
-  },
-  {
-    // Project 6: Operational Portal
-    background: "#6A0610",
-    headline: "#F9E7C9",
-    headlineStroke: "#F9E7C9",
-    body: "#F9E7C9",
-    link: "#F9E7C9",
-    accent: "#8A9EA7",
-  },
-  {
-    // Project 7: Smart Key
-    background: "#8A9EA7",
-    headline: "#280B0B",
-    headlineStroke: "#280B0B",
-    body: "#280B0B",
-    link: "#280B0B",
-    accent: "#6A0610",
-  },
-  {
-    // Project 8: Wheelchair EL-Haram Dashboard
-    background: "#F9E7C9",
-    headline: "#6A0610",
-    headlineStroke: "#6A0610",
-    body: "#280B0B",
-    link: "#6A0610",
-    accent: "#8A9EA7",
-  },
-  {
-    // Project 10: Kai
-    background: "#8A9EA7",
-    headline: "#280B0B",
-    headlineStroke: "#280B0B",
-    body: "#280B0B",
-    link: "#280B0B",
-    accent: "#6A0610",
-  },
-];
-
-function ProjectDirItem({
-  project,
-  index,
-  isSelected,
-  onSelect,
-}: {
-  project: Project;
-  index: number;
-  isSelected: boolean;
-  onSelect: () => void;
-}) {
-  const folderLabel = `${String(index + 1).padStart(2, "0")}_${project.id}`;
-  return (
-    <div
-      className={`flex items-center gap-1.5 px-2 py-0.5 cursor-pointer group  transition-all duration-100 ${
-        isSelected ? "bg-[#1a1a1a] text-[#e8e0cc]" : "hover:bg-[#1a1a1a]/40"
-      }`}
-      style={{ paddingLeft: "8px" }}
-      onClick={onSelect}
-    >
-      <span className={isSelected ? "text-[#c8b97a]" : "text-[#8a7a5a]"}>
-        <FolderIcon open={false} />
-      </span>
-      <span className={`text-[11px] leading-relaxed font-sans ${isSelected ? "text-[#e8e0cc]" : "text-[#2a2a2a]"}`}>
-        {folderLabel}
-      </span>
-    </div>
-  );
-}
-
 // Match hero — same program, same palette.
 const explorerPalette = {
   headline: COLORS.primary,
@@ -299,7 +168,7 @@ const explorerPalette = {
   accent: COLORS.accent,
 };
 
-export default function GalleryShowcase(_props: ProjectsProps) {
+export default function GalleryShowcase() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -343,7 +212,6 @@ export default function GalleryShowcase(_props: ProjectsProps) {
         <div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-4 justify-items-center mt-10">
             {projects.map((p, i) => {
-              const folderLabel = `${String(i + 1).padStart(2, "0")}_${p.id}`;
               const breadcrumbLabel = `portfolio / projects / ${p.title}`;
               return (
                 <button

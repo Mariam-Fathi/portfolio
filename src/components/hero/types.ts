@@ -63,12 +63,10 @@ export interface MariamSvgData {
 export type SectionId =
   | "hero"
   | "work"
-  | "certificates"
-  | "experience";
+  | "certificates";
 
 export const NAV_SECTIONS: { id: SectionId; label: string }[] = [
   { id: "hero", label: "home" },
   { id: "work", label: "projects" },
   { id: "certificates", label: "certificates" },
-  { id: "experience", label: "experience" },
 ];

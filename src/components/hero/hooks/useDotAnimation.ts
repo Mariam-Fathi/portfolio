@@ -11,13 +11,9 @@ import type { DotPositions } from "../types";
 // This is expected in development and does NOT happen in production builds.
 // If you need to test the first-visit animation locally, disable Strict Mode
 // temporarily or use a private/incognito window and hard-reload.
-let cachedPositions: DotPositions | null = null;
-let positionsCalculated = false;
 let animationEverCompleted = false;
 
 export function resetDotCache() {
-  cachedPositions = null;
-  positionsCalculated = false;
   animationEverCompleted = false;
 }
 
@@ -140,7 +136,6 @@ function buildDotTimeline(
   const dotLand = COLORS.dotLand;
   const dotGhost = COLORS.dotGhost;
   const dotFallLight = COLORS.dotFallLight;
-  const dotFallMid = COLORS.dotFallMid;
   const dotOnIFloor = COLORS.accent;
 
   const dropHeight = 72; // height above "ı" when not clicked (auto fall)
@@ -183,9 +178,6 @@ function buildDotTimeline(
       dot.style.transformOrigin = "50% 50%";
     }, [], 0);
   }
-
-  const smoothEaseOut = "sine.out" as const;
-  const smoothEaseInOut = "sine.inOut" as const;
 
   // ── Jump from "ı" to "a" — same arc realism as jump from "a" to "m" ────
   const iaH = 260;
@@ -529,9 +521,6 @@ export function useDotAnimation(
             freshPos.oPortfolioWidth = oData.width;
             freshPos.oPortfolioHeight = oData.height;
           }
-          cachedPositions = freshPos;
-          positionsCalculated = true;
-
           setDotAtFinal(dotEl, freshPos);
           gsap.set(dotEl, { opacity: 0, filter: "blur(15px)" });
           gsap.to(dotEl, {
@@ -562,9 +551,6 @@ export function useDotAnimation(
       pos.oPortfolioWidth = oData.width;
       pos.oPortfolioHeight = oData.height;
     }
-    cachedPositions = pos;
-    positionsCalculated = true;
-
     // ── Mobile: dot hidden, complete; user clicks O to trigger portfolio ──
     if (isMobile) {
       const tid = setTimeout(() => {
@@ -664,9 +650,6 @@ export function useDotAnimation(
       //   - plus one more paint cycle for tspan rects to stabilise
       // 600ms is conservative but reliable across all device speeds.
       resizeTimer = setTimeout(() => {
-        positionsCalculated = false;
-        cachedPositions = null;
-
         if (animationEverCompleted) {
           const svgIEl = svgIRef.current;
           const svgA2El = svgA2Ref.current;
@@ -690,8 +673,6 @@ export function useDotAnimation(
               pos.oPortfolioWidth = oData.width;
               pos.oPortfolioHeight = oData.height;
             }
-            cachedPositions = pos;
-            positionsCalculated = true;
             setDotAtFinal(dotEl2, pos);
             // Restore "iam" accent colors in case they were cleared on mobile
             colorLetters(svgIEl2, svgA2El2, svgM2El2);

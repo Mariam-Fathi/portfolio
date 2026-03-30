@@ -9,7 +9,6 @@ import type { MariamSvgData } from "../types";
 // invocation to skip the layout calculation and use cached (possibly stale)
 // data. This is expected in development only; production builds are unaffected.
 let cachedSvgData: MariamSvgData | null = null;
-let svgDataCalculated = false;
 
 // Bump this whenever the layout algorithm changes so stale caches are
 // automatically discarded on the first load after a deploy.
@@ -17,7 +16,6 @@ const MARIAM_LAYOUT_VERSION = 12;
 
 export function resetMariamCache() {
   cachedSvgData = null;
-  svgDataCalculated = false;
 }
 
 // ── Viewport height accounting for mobile browser chrome ────────────
@@ -257,8 +255,6 @@ function layoutMariam(
           screenHeight,
           layoutVersion: MARIAM_LAYOUT_VERSION,
         };
-        svgDataCalculated = true;
-
         requestAnimationFrame(() => {
           alignTextToBottom(textEl, mariamHeight, isMobile);
           // Extra rAF so isMariamReady fires after the browser has painted
@@ -270,43 +266,6 @@ function layoutMariam(
       }
     });
   });
-}
-
-// ── Apply cached data for instant restore ───────────────────────────
-// Used when the screen size hasn't changed and we want to skip the
-// full measurement cycle (e.g. same-session navigation back to hero).
-function applyCachedLayout(svg: SVGSVGElement, data: MariamSvgData, isMobile: boolean) {
-  const { fontSize, mariamWidth, mariamHeight } = data;
-  const padding = 10;
-  const sidebarOffsetPx = isMobile ? 0 : data.sidebarOffsetPx;
-
-  svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
-  svg.setAttribute("width", `${mariamWidth}px`);
-  svg.setAttribute("height", `${mariamHeight}px`);
-  Object.assign(svg.style, {
-    position: "relative",
-    left: `${sidebarOffsetPx}px`,
-    bottom: "0px",
-    margin: "0",
-    padding: "0",
-    height: `${mariamHeight}px`,
-    width: `${mariamWidth}px`,
-    overflow: "hidden",
-  });
-
-  const textEl = svg.querySelector(".hero-mariam-text");
-  if (textEl) {
-    textEl.setAttribute("x", "0");
-    textEl.setAttribute("y", `${mariamHeight}px`);
-    textEl.setAttribute("dominant-baseline", "baseline");
-    textEl.setAttribute("text-anchor", "start");
-    textEl.setAttribute("dx", "0");
-    textEl.setAttribute("font-size", `${fontSize}px`);
-    textEl.setAttribute("font-family", FONTS.display);
-    textEl.setAttribute("font-weight", "700");
-    textEl.setAttribute("letter-spacing", "0");
-    requestAnimationFrame(() => alignTextToBottom(textEl as SVGTextElement, mariamHeight, isMobile));
-  }
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────
@@ -344,7 +303,6 @@ export function useMariamSvg(
     // until the slot has a real size, so it handles "grid not settled yet"
     // correctly. The module-level cache is updated by layoutMariam and is
     // still used by the resize handler (no change there).
-    svgDataCalculated = false;
     cachedSvgData = null;
 
     const run = () => {
@@ -390,7 +348,6 @@ export function useMariamSvg(
           }
         }
 
-        svgDataCalculated = false;
         cachedSvgData = null;
         layoutMariam(currentSvg, portfolioHeaderRef, mobile);
       }, 150);

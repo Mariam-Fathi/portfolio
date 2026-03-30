@@ -18,7 +18,6 @@ export const COLORS = {
 // ── Font families ───────────────────────────────────────────────────
 export const FONTS = {
   display: '"Momo Trust Display", "Stack Sans", sans-serif',
-  body: '"Space Grotesk", "Inter", sans-serif',
 } as const;
 
 // ── Z-index layering ────────────────────────────────────────────────
@@ -27,7 +26,6 @@ export const Z_LAYERS = {
   dot: 100,
   frame: 200,
   mariamSvg: 300,
-  navigation: 101,
   engineerText: 9999,
   /** Mobile sidebar overlay — above Mariam and engineer text when open */
   mobileMenuOverlay: 10000,
@@ -67,9 +65,6 @@ export const ENGINEER_TEXT = {
    */
   VERTICAL_NUDGE_PX: 50,
 } as const;
-
-// ── App window frame (title bar, menu bar, section body connect as one programme) ───
-export const APP_WINDOW_INSET_PX = 6;
 
 // ── Skip only portfolio animation (O/line/drag/expand). Dot and engineer text still animate. ───
 export const SKIP_PORTFOLIO_ANIMATION = true;

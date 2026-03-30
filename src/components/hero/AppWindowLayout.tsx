@@ -1,20 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import localFont from "next/font/local";
 import { COLORS, FONTS, Z_LAYERS } from "./constants";
 import type { SectionId } from "./types";
 import { NAV_SECTIONS } from "./types";
-
-const goAroundFont = localFont({
-  src: "../../../public/fonts/go_around_the_books/Go around the books 2022.ttf",
-  display: "swap",
-});
-
-const kawaiiStitchFont = localFont({
-  src: "../../../public/fonts/kawaii_stitch/Kawaii Stitch.ttf",
-  display: "swap",
-});
 
 export interface AppWindowLayoutProps {
   onNavigate: (section: string) => void;
@@ -27,7 +16,7 @@ export interface AppWindowLayoutProps {
  * showing a section so the chrome stays and only the content area is replaced.
  */
 export default function AppWindowLayout({ onNavigate, activeSection, children }: AppWindowLayoutProps) {
-  const handleNavigate = (section: SectionId | "hero") => {
+  const handleNavigate = (section: SectionId) => {
     onNavigate(section);
   };
 
@@ -70,8 +59,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
 
           <nav className="hero-window-title-nav" aria-label="Site sections">
             <ul className="hero-window-title-nav-links">
-              {/* Home + projects + certificates only (hide experience). */}
-              {NAV_SECTIONS.filter((s) => s.id !== "experience").map((s) => {
+              {NAV_SECTIONS.map((s) => {
                 const isCurrent = s.id === activeSection;
                 return (
                   <li key={s.id}>
@@ -132,7 +120,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
 
               <div className="hero-window-mobile-menu-content">
                 <ul className="hero-window-mobile-menu-links">
-                  {NAV_SECTIONS.filter((s) => s.id !== "experience").map((s) => {
+                  {NAV_SECTIONS.map((s) => {
                     const isCurrent = s.id === activeSection;
                     return (
                       <li key={s.id}>

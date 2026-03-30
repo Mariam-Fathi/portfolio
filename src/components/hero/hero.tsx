@@ -11,17 +11,14 @@ const pouitiesFont = localFont({
   display: "swap",
 });
 
-import { NAV_SECTIONS, type HeroProps, type SectionId } from "./types";
+import { NAV_SECTIONS, type HeroProps } from "./types";
 import { useIsMobile, checkIsMobile } from "./hooks/useIsMobile";
 import { useHeroBreakpoints } from "./hooks/useHeroBreakpoints";
 import { useMariamSvg } from "./hooks/useMariamSvg";
-import { resetDotCache, useDotAnimation } from "./hooks/useDotAnimation";
+import { hasDotAnimationEverCompleted, resetDotCache, useDotAnimation } from "./hooks/useDotAnimation";
 import { usePortfolWidth } from "./hooks/usePortfolWidth";
 import { usePortfolioAnimation } from "./hooks/usePortfolioAnimation";
-import { hasDotAnimationEverCompleted } from "./hooks/useDotAnimation";
 import { useEngineerText } from "./hooks/useEngineerText";
-import { useHeroNavigation } from "./hooks/useHeroNavigation";
-import HeroContactStrip from "./HeroContactStrip";
 import HeroContactsPanel from "./HeroContactsPanel";
 import HeroExperiencePanel from "./HeroExperiencePanel";
 
@@ -52,7 +49,6 @@ const Hero: React.FC<HeroProps> = ({
   const [isMounted, setIsMounted] = useState(false);
   const [portfolioRevealReady, setPortfolioRevealReady] = useState(false);
   const [dotLandedOnI, setDotLandedOnI] = useState(false);
-  const [engineerRevealComplete, setEngineerRevealComplete] = useState(false);
   const [isDotClicked, setIsDotClicked] = useState(false);
   const [showDotClickPrompt, setShowDotClickPrompt] = useState(false);
   const [dotClickPos, setDotClickPos] = useState<{ x: number; y: number; size: number } | null>(null);
@@ -87,7 +83,6 @@ const Hero: React.FC<HeroProps> = ({
     if (hasDotAnimationEverCompleted()) {
       setIsDotClicked(true);
       setDotLandedOnI(true);
-      setEngineerRevealComplete(true);
       isDotClickedRef.current = true;
     }
   }, [isMounted, isLg]);
@@ -108,7 +103,6 @@ const Hero: React.FC<HeroProps> = ({
       if (svgA2Ref.current) gsap.set(svgA2Ref.current, { fill: COLORS.primary });
       if (svgM2Ref.current) gsap.set(svgM2Ref.current, { fill: COLORS.primary });
       setDotLandedOnI(false);
-      setEngineerRevealComplete(false);
       if (dotRef.current) {
         Object.assign(dotRef.current.style, { display: "none", opacity: "0", visibility: "hidden" });
       }
@@ -123,7 +117,6 @@ const Hero: React.FC<HeroProps> = ({
       // state flags consistent so engineerRevealActive stays true.
       setIsDotClicked(true);
       setDotLandedOnI(true);
-      setEngineerRevealComplete(true);
       isDotClickedRef.current = true;
     }
   }, [isLg, isDotClicked]);
@@ -163,7 +156,7 @@ const Hero: React.FC<HeroProps> = ({
     onDotLandedOnI,
   );
 
-  const { isPortfolioAnimationComplete } = usePortfolioAnimation(
+  usePortfolioAnimation(
     portfolioHeaderRef,
     isActive && isMariamReady,
     isActive,
@@ -191,10 +184,8 @@ const Hero: React.FC<HeroProps> = ({
     svgM2Ref,
     engineerRevealActive,
     isMariamReady,
-    useCallback(() => setEngineerRevealComplete(true), []),
+    useCallback(() => {}, []),
   );
-
-  useHeroNavigation(portfolioHeaderRef, isPortfolioAnimationComplete);
 
   // ── Dot click position ────────────────────────────────────────────
   useEffect(() => {
@@ -364,17 +355,6 @@ const Hero: React.FC<HeroProps> = ({
   // ── Render ────────────────────────────────────────────────────────
   return (
     <section id="hero" className="hero-section" style={{ backgroundColor: PAGE_BACKGROUND }}>
-      {/* SVG filter */}
-      <svg width="0" height="0" style={{ position: "absolute" }}>
-        <defs>
-          <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves={2} seed={92} result="noise" />
-            <feGaussianBlur in="noise" stdDeviation={2} result="blurred" />
-            <feDisplacementMap in="SourceGraphic" in2="blurred" scale={110} xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </defs>
-      </svg>
-
       {/* ── Window frame ─────────────────────────────────────────── */}
       <div className="hero-outer-frame">
         <div className={`hero-yellow-frame hero-window${isMobileMenuOpen ? " hero-window-mobile-menu-open" : ""}`}>
@@ -412,7 +392,7 @@ const Hero: React.FC<HeroProps> = ({
 
               <nav className="hero-window-title-nav" aria-label="Site sections">
                 <ul className="hero-window-title-nav-links">
-                  {NAV_SECTIONS.filter((s) => s.id !== "experience").map((s) => {
+                  {NAV_SECTIONS.map((s) => {
                     const isCurrent = s.id === "hero";
                     return (
                       <li key={s.id}>
@@ -420,7 +400,7 @@ const Hero: React.FC<HeroProps> = ({
                           type="button"
                           className={isCurrent ? "active" : undefined}
                           aria-current={isCurrent ? "page" : undefined}
-                          onClick={() => onNavigate(s.id as SectionId)}
+                          onClick={() => onNavigate(s.id)}
                         >
                           {s.label}
                         </button>
@@ -537,7 +517,7 @@ const Hero: React.FC<HeroProps> = ({
 
                 <div className="hero-window-mobile-menu-content">
                   <ul className="hero-window-mobile-menu-links">
-                    {NAV_SECTIONS.filter((s) => s.id !== "experience").map((s) => {
+                    {NAV_SECTIONS.map((s) => {
                       const isCurrent = s.id === "hero";
                       return (
                         <li key={s.id}>
@@ -547,7 +527,7 @@ const Hero: React.FC<HeroProps> = ({
                             onClick={(e) => {
                               e.preventDefault();
                               setIsMobileMenuOpen(false);
-                              onNavigate(s.id as SectionId);
+                              onNavigate(s.id);
                             }}
                           >
                             {s.label}

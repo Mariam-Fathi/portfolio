@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import gsap from "gsap";
-import { COLORS, SKIP_PORTFOLIO_ANIMATION, TIMING } from "../constants";
-import { checkIsMobile } from "./useIsMobile";
+import { SKIP_PORTFOLIO_ANIMATION } from "../constants";
 import type { PortfolioData, PortfolioCacheRef } from "../types";
 import {
   portfolioCache,
@@ -798,7 +797,5 @@ export function usePortfolioAnimation(
     if (tl) tl.play();
   }, [startAutoExpand, isComplete]);
 
-  const collapsePortfolio = useCallback(() => setIsComplete(false), []);
-
-  return { isPortfolioAnimationComplete: isComplete, collapsePortfolio };
+  return { isPortfolioAnimationComplete: isComplete };
 }

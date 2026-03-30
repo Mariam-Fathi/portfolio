@@ -7,7 +7,6 @@ import Hero from "@/components/hero/hero";
 import AppWindowLayout from "@/components/hero/AppWindowLayout";
 import { resetMariamCache } from "@/components/hero/hooks/useMariamSvg";
 import { gsap } from "gsap";
-import { Experience } from "@/components/Experience";
 import GalleryShowcase from "@/components/projects/projects";
 import { Certificates, CERTIFICATE_IMAGE_URLS } from "@/components/Certificates";
 import { COLORS } from "@/components/hero/constants";
@@ -195,15 +194,6 @@ export default function Home() {
       {activeSection !== "hero" && (
         <AppWindowLayout activeSection={activeSection} onNavigate={(section: string) => handleNavigate(section as SectionId)}>
           <div className="content-container app-window-sections" ref={contentRef}>
-            {/* Experience Section */}
-            <section 
-              id="experience-content" 
-              tabIndex={-1}
-              className={`content-section ${activeSection === "experience" ? "active" : ""}`}
-            >
-              <Experience isActive={activeSection === "experience"}/>
-            </section>
-
             {/* Work Section */}
             <section 
               id="work-content" 
@@ -305,35 +295,6 @@ export default function Home() {
         #work-content {
           padding: 0 !important;
           margin: 0 !important;
-        }
-
-        .section-content {
-          height: 100%;
-          padding: 8rem 4rem 4rem;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .placeholder-content {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          font-family: "Space Grotesk", sans-serif;
-          color: #1e140b;
-        }
-
-        .placeholder-content h2 {
-          font-family: "Momo Trust Display", serif;
-          font-size: 4rem;
-          margin-bottom: 2rem;
-          color: #1e140b;
-        }
-
-        .placeholder-content p {
-          font-size: 1.5rem;
-          opacity: 0.7;
         }
 
       `}</style>
