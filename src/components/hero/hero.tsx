@@ -685,7 +685,6 @@ const Hero: React.FC<HeroProps> = ({
         }
         @media (min-width: 768px) {
           .hero-window { --titlebar-square-height: 120px; }
-          .hero-window-title-bar { padding: 0; }
         }
 
         .hero-window-title-bar {
@@ -699,7 +698,7 @@ const Hero: React.FC<HeroProps> = ({
           box-sizing: border-box;
           height: var(--titlebar-square-height);
           min-height: var(--titlebar-square-height);
-          padding: 0;
+          padding: 0 clamp(10px, 3vw, 14px);
           color: ${COLORS.primary};
           border: 2px solid ${COLORS.primary};
           box-shadow: 2px 2px 0 #1a1a1a;
@@ -718,7 +717,6 @@ const Hero: React.FC<HeroProps> = ({
           padding: 0;
         }
         @media (max-width: 768px) {
-          .hero-window-title-bar { padding: 0 clamp(10px, 3vw, 14px); }
           .hero-window-title-inner { gap: 0.5rem; }
         }
 

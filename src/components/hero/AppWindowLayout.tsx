@@ -184,10 +184,6 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           .hero-window {
             --titlebar-square-height: 120px;
           }
-          .hero-window-title-bar {
-            /* With a fixed bar height, remove vertical padding to prevent overflow. */
-            padding: 0;
-          }
         }
         .hero-window-title-bar {
           flex-shrink: 0;
@@ -200,7 +196,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           box-sizing: border-box;
           height: var(--titlebar-square-height);
           min-height: var(--titlebar-square-height);
-          padding: 0;
+          padding: 0 clamp(10px, 3vw, 14px);
           color: ${COLORS.primary};
           overflow: visible;
           border: 2px solid ${COLORS.primary};
@@ -217,9 +213,6 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           padding: 0;
         }
         @media (max-width: 768px) {
-          .hero-window-title-bar {
-            padding: 0 clamp(10px, 3vw, 14px);
-          }
           .hero-window-title-inner {
             gap: 0.5rem;
           }
