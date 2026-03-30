@@ -2,6 +2,7 @@ import { useEffect, useRef, type RefObject } from "react";
 import gsap from "gsap";
 import { checkIsMobile } from "./useIsMobile";
 import { ENGINEER_TEXT } from "../constants";
+import { hasDotAnimationEverCompleted } from "./useDotAnimation";
 
 // ── Module-level cache (survives unmount / remount) ─────────────────
 // IMPORTANT – React 18 Strict Mode double-invokes effects in development.
@@ -24,6 +25,21 @@ function getWidthRatio(el: HTMLDivElement): number {
   return cachedWidthRatio ?? 1;
 }
 
+const isHeroDebugEnabled = () =>
+  typeof window !== "undefined" &&
+  (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.search.includes("heroDebug=1") ||
+    window.localStorage.getItem("heroDebug") === "1" ||
+    (window as Window & { __HERO_DEBUG__?: boolean }).__HERO_DEBUG__ === true
+  );
+
+const debugEngineer = (event: string, payload: Record<string, unknown>) => {
+  if (!isHeroDebugEnabled()) return;
+  console.log(`[hero:engineer] ${event} ${JSON.stringify(payload)}`);
+};
+
 /**
  * Animates the "Software Engineer" text with a write-on (clip reveal) effect
  * and positions it dynamically above the "ıam" portion of "Mariam".
@@ -45,6 +61,7 @@ export function useEngineerText(
   svgM2Ref: RefObject<SVGTSpanElement | null>,
   startEngineerReveal: boolean,
   isMariamReady: boolean,
+  isMobileViewport: boolean,
   onEngineerRevealComplete?: () => void,
 ) {
   const revealStartedRef = useRef(false);
@@ -82,6 +99,13 @@ export function useEngineerText(
     if (!startEngineerReveal) return;
     const el = engineerRef.current;
     if (!el) return;
+    if (isMobileViewport) return;
+    debugEngineer("revealActive:ensureVisible", {
+      startEngineerReveal,
+      isMariamReady,
+      engineerTextEverShown,
+      hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
+    });
     // Immediate: ensure opacity 1
     requestAnimationFrame(() => {
       if (engineerRef.current) gsap.set(engineerRef.current, { opacity: 1, visibility: "visible" });
@@ -93,12 +117,116 @@ export function useEngineerText(
       if (engineerRef.current) gsap.set(engineerRef.current, { clipPath: "none" });
     }, delayMs);
     return () => clearTimeout(t);
-  }, [startEngineerReveal, isMariamReady, engineerRef]);
+  }, [startEngineerReveal, isMariamReady, engineerRef, isMobileViewport]);
+
+  // ── Hard restore after mobile → desktop remount ────────────────────
+  // The engineer portal is conditionally unmounted on mobile in hero.tsx.
+  // When it remounts on desktop, force the final visible state if reveal had
+  // already happened (or dot cache says it did), regardless of effect timing.
+  useEffect(() => {
+    if (isMobileViewport) return;
+    const el = engineerRef.current;
+    if (!el) return;
+    const iEl = svgIRef.current;
+    const a2El = svgA2Ref.current;
+    const m2El = svgM2Ref.current;
+
+    // Only force desktop restore after the reveal already happened.
+    // Do NOT run this during first write-on, otherwise it cancels the typing effect.
+    const shouldRestoreVisible =
+      engineerTextEverShown || hasDotAnimationEverCompleted();
+    if (!shouldRestoreVisible) return;
+
+    if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
+    gsap.killTweensOf(el);
+    gsap.set(el, {
+      opacity: 1,
+      visibility: "visible",
+      filter: "blur(0px)",
+      x: 0,
+      y: 0,
+      rotation: 0,
+      clipPath: "none",
+    });
+
+    const applyDesktopPosition = () => {
+      const currentEl = engineerRef.current;
+      const currentI = svgIRef.current;
+      const currentA2 = svgA2Ref.current;
+      const currentM2 = svgM2Ref.current;
+      if (!currentEl || !currentI || !currentA2 || !currentM2) return;
+
+      const iRect = currentI.getBoundingClientRect();
+      const m2Rect = currentM2.getBoundingClientRect();
+      const iamWidth = m2Rect.right - iRect.left;
+      const dotY = iRect.top + iRect.height * 0.19;
+      if (iamWidth <= 0) return;
+
+      const ratio = getWidthRatio(currentEl);
+      const targetFontSize = (iamWidth / ratio) * 0.95;
+      const minFontSize = 20;
+      currentEl.style.fontSize = `${Math.max(minFontSize, targetFontSize)}px`;
+
+      const engRect = currentEl.getBoundingClientRect();
+      const descenderOffset = engRect.height * 0.4;
+      const iamCenterX = iRect.left + iamWidth / 2;
+      const engLeft = iamCenterX - engRect.width / 2;
+      const top = dotY - engRect.height + descenderOffset + ENGINEER_TEXT.VERTICAL_NUDGE_PX;
+
+      currentEl.style.top = `${top}px`;
+      currentEl.style.bottom = "auto";
+      currentEl.style.left = `${engLeft}px`;
+      currentEl.style.right = "auto";
+      if (shouldRestoreVisible) currentEl.style.clipPath = "none";
+      currentEl.style.visibility = "visible";
+      currentEl.style.opacity = "1";
+    };
+
+    // Re-apply position after desktop remount/resize. Multiple passes handle
+    // post-resize SVG layout settling.
+    applyDesktopPosition();
+    requestAnimationFrame(applyDesktopPosition);
+    const t = setTimeout(() => {
+      requestAnimationFrame(applyDesktopPosition);
+    }, 250);
+
+    debugEngineer("desktop:hardRestoreVisible", {
+      isMobileViewport,
+      startEngineerReveal,
+      engineerTextEverShown,
+      hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
+      opacity: getComputedStyle(el).opacity,
+      visibility: getComputedStyle(el).visibility,
+      clipPath: getComputedStyle(el).clipPath,
+      hasIRef: !!iEl,
+      hasA2Ref: !!a2El,
+      hasM2Ref: !!m2El,
+      top: el.style.top,
+      left: el.style.left,
+    });
+    return () => clearTimeout(t);
+  }, [isMobileViewport, isMariamReady, startEngineerReveal, engineerRef, svgIRef, svgA2Ref, svgM2Ref]);
 
   // ── Write-on reveal (starts when dot lands on "ı") ──────────────
   useEffect(() => {
+    if (isMobileViewport) {
+      const el = engineerRef.current;
+      if (el) {
+        gsap.killTweensOf(el);
+        gsap.set(el, { opacity: 0, visibility: "hidden", clipPath: "none", filter: "blur(0px)" });
+      }
+      return;
+    }
+
     if (!startEngineerReveal) return;
     const isMobile = checkIsMobile();
+    debugEngineer("writeOn:effectStart", {
+      startEngineerReveal,
+      isMobile,
+      engineerTextEverShown,
+      hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
+      isMariamReady,
+    });
 
     // ── Mobile/sm: set final state immediately (do not set engineerTextEverShown so that
     //    if user resizes to lg and clicks the dot, they still get the write-on effect) ──
@@ -106,7 +234,17 @@ export function useEngineerText(
       if (engineerRef.current) {
         const el = engineerRef.current;
         if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
-        gsap.set(el, { opacity: 1, filter: "blur(0px)", x: 0, y: 0, rotation: 0, clipPath: "none" });
+        gsap.set(el, { opacity: 0, visibility: "hidden", filter: "blur(0px)", x: 0, y: 0, rotation: 0, clipPath: "none" });
+        debugEngineer("mobile:forcedVisible", {
+          opacity: getComputedStyle(el).opacity,
+          visibility: getComputedStyle(el).visibility,
+          clipPath: getComputedStyle(el).clipPath,
+        });
+      }
+      // If dot flow already completed, treat engineer text as permanently revealed.
+      if (hasDotAnimationEverCompleted()) {
+        engineerTextEverShown = true;
+        debugEngineer("mobile:markEverShownFromDotCache", { engineerTextEverShown });
       }
       onEngineerRevealComplete?.();
       return;
@@ -118,6 +256,7 @@ export function useEngineerText(
       if (el) {
         el.textContent = "Software  Engineer";
         gsap.set(el, { opacity: 0, filter: "blur(15px)", x: 0, y: 0, rotation: 0, clipPath: "none" });
+        debugEngineer("desktop:cachedPathFadeIn", { engineerTextEverShown });
         gsap.to(el, {
           opacity: 1,
           filter: "blur(0px)",
@@ -148,6 +287,7 @@ export function useEngineerText(
     });
 
     revealStartedRef.current = true;
+    debugEngineer("desktop:firstWriteOnStart", { engineerTextEverShown });
     gsap.to(el, {
       clipPath: "inset(-20% 0% -20% 0)",
       duration: 2,
@@ -156,12 +296,16 @@ export function useEngineerText(
       onComplete: () => {
         gsap.set(el, { clipPath: "none" });
         engineerTextEverShown = true;
+        debugEngineer("desktop:firstWriteOnComplete", {
+          engineerTextEverShown,
+          hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
+        });
         onEngineerRevealComplete?.();
       },
     });
   // onEngineerRevealComplete is stable (useCallback [] deps in hero.tsx).
   // Listed here to satisfy exhaustive-deps without causing extra re-runs.
-  }, [startEngineerReveal, engineerRef, onEngineerRevealComplete]);
+  }, [startEngineerReveal, engineerRef, onEngineerRevealComplete, isMariamReady, isMobileViewport]);
 
   // ── Position & scale relative to the "ıam" in Mariam ───────────
   // Runs only when Mariam is ready (not when reveal starts) so the text never
@@ -171,11 +315,12 @@ export function useEngineerText(
   // fontSize) via direct assignment. No !important is needed because the
   // portal in hero.tsx intentionally sets only non-positional defaults.
   useEffect(() => {
-    if (!isMariamReady) return;
+    if (!isMariamReady || isMobileViewport) return;
     const el = engineerRef.current;
     const a2 = svgA2Ref.current;
     const m2 = svgM2Ref.current;
-    if (!el || !a2 || !m2) return;
+    const svgEl = svgRef.current;
+    if (!el || !a2 || !m2 || !svgEl) return;
 
     if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
 
@@ -218,6 +363,18 @@ export function useEngineerText(
       if (!engineerTextEverShown && !isMobile && !writeOnInProgress) {
         gsap.set(el, { opacity: 1, clipPath: "inset(-20% 100% -20% 0)" });
       }
+      debugEngineer("position:applied", {
+        isMobile,
+        isMariamReady,
+        startEngineerReveal,
+        engineerTextEverShown,
+        writeOnInProgress,
+        top: el.style.top,
+        left: el.style.left,
+        opacity: getComputedStyle(el).opacity,
+        visibility: getComputedStyle(el).visibility,
+        clipPath: getComputedStyle(el).clipPath,
+      });
     };
 
     // Three staggered calls defend against SVG not being fully painted yet:
@@ -230,27 +387,56 @@ export function useEngineerText(
     const t2 = setTimeout(position, 300);
 
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    let resizeRaf: number | null = null;
+    let settleTimer: ReturnType<typeof setTimeout> | null = null;
     const onResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
-      // 600ms matches useDotAnimation's resize debounce — gives Mariam's full
-      // layoutMariam retry cycle (150ms debounce + up to 12 rAF frames ~200ms)
-      // time to finish before we re-measure the "ıam" tspan rects.
+      if (settleTimer) clearTimeout(settleTimer);
+      // Keep it responsive while still letting Mariam settle.
+      // We run one near-immediate pass, then a short debounced pass.
+      if (resizeRaf) cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(() => {
+        requestAnimationFrame(position);
+      });
       resizeTimer = setTimeout(() => {
         resizeTimer = null;
         cachedWidthRatio = null; // invalidate — fontSize changes on resize
         requestAnimationFrame(() => requestAnimationFrame(position));
-      }, 600);
+      }, 160);
+      // Final late pass after SVG/text settle on larger breakpoint shifts.
+      settleTimer = setTimeout(() => {
+        cachedWidthRatio = null;
+        requestAnimationFrame(() => requestAnimationFrame(position));
+      }, 420);
     };
     window.addEventListener("resize", onResize);
+
+    // React to real SVG layout/size changes, not just window resize events.
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => {
+        if (resizeRaf) cancelAnimationFrame(resizeRaf);
+        resizeRaf = requestAnimationFrame(() => {
+          requestAnimationFrame(position);
+        });
+      });
+      observer.observe(svgEl);
+    }
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
+      if (resizeRaf) cancelAnimationFrame(resizeRaf);
       if (resizeTimer) {
         clearTimeout(resizeTimer);
         resizeTimer = null;
       }
+      if (settleTimer) {
+        clearTimeout(settleTimer);
+        settleTimer = null;
+      }
+      if (observer) observer.disconnect();
       window.removeEventListener("resize", onResize);
     };
-  }, [isMariamReady, startEngineerReveal, engineerRef, svgIRef, svgA2Ref, svgM2Ref]);
+  }, [isMariamReady, startEngineerReveal, isMobileViewport, engineerRef, svgRef, svgIRef, svgA2Ref, svgM2Ref]);
 }

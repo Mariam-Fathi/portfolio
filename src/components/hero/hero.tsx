@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import localFont from "next/font/local";
 import gsap from "gsap";
@@ -28,6 +28,35 @@ const Hero: React.FC<HeroProps> = ({
   isActive = true,
   portfolioCache: portfolioCacheProp,
 }) => {
+  const isHeroDebugEnabled = useMemo(
+    () => () =>
+      typeof window !== "undefined" &&
+      (
+        // Auto-enable while debugging on localhost/dev.
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.search.includes("heroDebug=1") ||
+        window.localStorage.getItem("heroDebug") === "1" ||
+        (window as Window & { __HERO_DEBUG__?: boolean }).__HERO_DEBUG__ === true
+      ),
+    [],
+  );
+
+  const debugHero = useCallback(
+    (event: string, payload: Record<string, unknown>) => {
+      if (!isHeroDebugEnabled()) return;
+      console.log(`[hero] ${event} ${JSON.stringify(payload)}`);
+    },
+    [isHeroDebugEnabled],
+  );
+
+  useEffect(() => {
+    debugHero("debug:enabled", {
+      hostname: typeof window !== "undefined" ? window.location.hostname : "n/a",
+      href: typeof window !== "undefined" ? window.location.href : "n/a",
+    });
+  }, [debugHero]);
+
   // ── Refs ──────────────────────────────────────────────────────────
   const portfolioHeaderRef = useRef<HTMLDivElement>(null);
   const numberSevenRef = useRef<SVGSVGElement>(null);
@@ -171,10 +200,58 @@ const Hero: React.FC<HeroProps> = ({
   const engineerRevealActive =
     isMounted &&
     (isLg
-      ? dotLandedOnI || isDotAnimationComplete
+      ? dotLandedOnI || isDotAnimationComplete || hasDotAnimationEverCompleted()
       : isSm
         ? isDotAnimationComplete
         : portfolioRevealReady || isDotAnimationComplete);
+
+  useEffect(() => {
+    debugHero("engineerRevealActive:changed", {
+      isLg,
+      isMd,
+      isSm,
+      isMounted,
+      isMariamReady,
+      portfolioRevealReady,
+      dotLandedOnI,
+      isDotAnimationComplete,
+      hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
+      isDotClicked,
+      engineerRevealActive,
+    });
+  }, [
+    debugHero,
+    isLg,
+    isMd,
+    isSm,
+    isMounted,
+    isMariamReady,
+    portfolioRevealReady,
+    dotLandedOnI,
+    isDotAnimationComplete,
+    isDotClicked,
+    engineerRevealActive,
+  ]);
+
+  useEffect(() => {
+    if (!isHeroDebugEnabled()) return;
+    const onResize = () => {
+      debugHero("window:resize", {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        isLg,
+        isMd,
+        isSm,
+        isDotClicked,
+        dotLandedOnI,
+        isDotAnimationComplete,
+        hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
+        engineerRevealActive,
+      });
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [isLg, isMd, isSm, isDotClicked, dotLandedOnI, isDotAnimationComplete, engineerRevealActive, isHeroDebugEnabled, debugHero]);
 
   useEngineerText(
     engineerTextRef,
@@ -184,6 +261,7 @@ const Hero: React.FC<HeroProps> = ({
     svgM2Ref,
     engineerRevealActive,
     isMariamReady,
+    isMobile,
     useCallback(() => {}, []),
   );
 
@@ -564,7 +642,7 @@ const Hero: React.FC<HeroProps> = ({
       )}
 
       {/* Engineer text */}
-      {!isMobile && isMounted && createPortal(
+      {isMounted && createPortal(
         <div
           ref={engineerTextRef}
           className={`hero-engineer-text ${pouitiesFont.className}`}
@@ -577,8 +655,6 @@ const Hero: React.FC<HeroProps> = ({
             pointerEvents: "none",
             whiteSpace: "nowrap",
             overflow: "visible",
-            opacity: engineerRevealActive ? 1 : 0,
-            filter: "blur(0px)",
           }}
         >
           Software  Engineer
