@@ -6,7 +6,7 @@ import { useEffect, useState, type RefObject } from "react";
  * (useMariamSvg, etc.) never stall waiting for a measurement.
  *
  * Separated from animation hooks to break the circular dependency:
- *   portfolWidth → useMariamSvg → useDotAnimation → usePortfolioAnimation
+ *   portfolWidth → useMariamSvg → useDotAnimation
  */
 export function usePortfolWidth(
   headerRef: RefObject<HTMLDivElement | null>,

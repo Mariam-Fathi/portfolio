@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
-// Keep portfolio cache in page chunk so it survives Hero unmount (production chunk loading)
-import { portfolioCache } from "@/components/hero/portfolioCache";
+import React, { useCallback, useRef, useState } from "react";
 import Hero from "@/components/hero/hero";
 import AppWindowLayout from "@/components/hero/AppWindowLayout";
 import { resetMariamCache } from "@/components/hero/hooks/useMariamSvg";
 import { gsap } from "gsap";
 import GalleryShowcase from "@/components/projects/projects";
-import { Certificates, CERTIFICATE_IMAGE_URLS } from "@/components/Certificates";
+import { Certificates } from "@/components/Certificates";
 import { COLORS } from "@/components/hero/constants";
 import type { SectionId } from "@/components/hero/types";
 
@@ -20,14 +18,6 @@ export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const heroInitRef = useRef(false);
-
-  // Preload certificate images in the background so they’re ready when the user opens the section
-  useEffect(() => {
-    CERTIFICATE_IMAGE_URLS.forEach((src) => {
-      const img = new Image();
-      img.src = encodeURI(src);
-    });
-  }, []);
 
   const handleHeroReady = useCallback(() => {
     setIsHeroReady(true);
@@ -55,9 +45,8 @@ export default function Home() {
   const handleNavigate = useCallback(async (sectionId: SectionId) => {
     if (isTransitioning || activeSection === sectionId) return;
     
-    // When leaving hero: mark "expand portfolio when they come back" (page sets it so it works even if Hero chunk unloads on Vercel)
+    // When leaving hero: hide the "ı" dot so it does not linger over the next section
     if (activeSection === "hero" && sectionId !== "hero") {
-      portfolioCache.expandOnReturnToHero = true;
       const dots = document.querySelectorAll('.original-i-dot, .final-i-dot, .original-i-dot-svg, .final-i-dot-svg, .original-i-dot-se, .final-i-dot-se');
       dots.forEach((dot) => {
         const htmlDot = dot as HTMLElement;
@@ -75,8 +64,6 @@ export default function Home() {
     const tl = gsap.timeline();
 
     if (sectionId === "hero") {
-      // User clicked "home": tell Hero to expand portfolio when it mounts (see portfolioCache / usePortfolioAnimation restore branch).
-      portfolioCache.expandOnReturnToHero = true;
       // Always force a fresh Mariam measurement on return to home.
       // Production remount timing can make cached SVG geometry stale.
       resetMariamCache();
@@ -185,7 +172,6 @@ export default function Home() {
             onNavigate={(section: string) => handleNavigate(section as SectionId)}
             onReady={handleHeroReady}
             isActive={activeSection === "hero" && isHeroReady}
-            portfolioCache={portfolioCache}
           />
         </div>
       )}

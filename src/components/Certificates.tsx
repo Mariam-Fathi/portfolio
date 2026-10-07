@@ -8,7 +8,8 @@ import { COLORS } from "@/components/hero/constants";
 type Certificate = {
   id: string;
   title: string;
-  image: string;
+  /** Optional: certificates without an image show a text placeholder. */
+  image?: string;
   /** Intrinsic width of the image (for exact container fit, no layout shift). */
   imageWidth?: number;
   /** Intrinsic height of the image (for exact container fit, no layout shift). */
@@ -20,71 +21,83 @@ type Certificate = {
 };
 
 const certificates: Certificate[] = [
-
   {
     id: "data-engineering",
     title: "Data Engineering",
     image: "/certificates/data-engineering.jpeg",
-    imageWidth: 1200,
-    imageHeight: 800,
-    platform: "DeepLearning.AI",
+    imageWidth: 1169,
+    imageHeight: 928,
+    platform: "DeepLearning.AI & AWS",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    skills: ["Data Modeling", "ETL", "SQL", "Data Pipelines", "Warehousing"],
+    skills: ["AWS", "Airflow", "Terraform", "Spark", "dbt", "Data Modeling"],
     brief:
-      "A foundation in building reliable data pipelines: from modeling and transforming raw data to designing maintainable ingestion and warehousing workflows.",
+      "Professional certificate (4 courses) with AWS. Built batch and streaming pipelines in graded labs and two capstones: ingestion, orchestration with Airflow, Infrastructure as Code with Terraform and data quality checks. Designed data lakes, warehouses and lakehouses (Glue, Redshift, Iceberg), modelled data with dbt and processed data with Spark.",
+  },
+  {
+    id: "google-advanced-data-analytics",
+    title: "Advanced Data Analytics",
+    platform: "Google",
+    link: "https://www.coursera.org/account/accomplishments/verify/G6B7TQ4Q8U4V",
+    skills: ["Python", "Statistics", "Regression", "Machine Learning"],
+    brief:
+      "Google Advanced Data Analytics Professional Certificate, in progress. Completed: Foundations of Data Science.",
+  },
+  {
+    id: "data-analysis-python",
+    title: "Data Analysis with Python",
+    platform: "Google",
+    link: "https://coursera.org/share/66f2c301ccce9090b0b23039b9407a57",
+    skills: ["Python", "pandas", "NumPy", "Jupyter"],
+    brief:
+      "Introduction to Data Analysis Using Python: cleaning and manipulating data with pandas and NumPy in Jupyter Notebooks.",
   },
   {
     id: "ai-agents",
     title: "AI Agents Intensive",
     image: "/certificates/5-Day AI Agents Intensive Course with Google.png",
-    imageWidth: 1200,
-    imageHeight: 800,
+    imageWidth: 4800,
+    imageHeight: 2960,
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
-    skills: ["Agent Workflows", "Prompting", "Tool Use", "Evaluation", "Safety"],
+    skills: ["Agent Architectures", "Tools & MCP", "Sessions & Memory", "Evaluation", "Google ADK"],
     brief:
-      "Hands-on training for building agent-like systems: planning steps, integrating tools, and validating outputs with practical evaluation and safety considerations.",
+      "5-Day AI Agents Intensive Course with Google: agent architectures, tools and MCP, sessions and memory, evaluation and production deployment, with Gemini and Google ADK. My capstone was the Font Selection Agent (see Projects).",
   },
   {
     id: "computer-vision",
     title: "Computer Vision",
     image: "/certificates/Mariam Fathi - Computer Vision.png",
-    imageWidth: 1200,
-    imageHeight: 800,
-    platform: "Kaggle",
+    imageWidth: 4800,
+    imageHeight: 2960,
+    platform: "Kaggle Learn",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    skills: ["Image Processing", "CNNs", "Vision Pipelines", "Model Evaluation"],
-    brief:
-      "Applied computer vision fundamentals: processing images, training convolutional models, and evaluating performance for real-world vision tasks.",
+    skills: ["CNNs", "Data Augmentation", "TensorFlow/Keras"],
+    brief: "Convolutional neural networks and data augmentation for image classification with TensorFlow/Keras.",
   },
   {
     id: "time-series",
     title: "Time Series",
     image: "/certificates/Mariam Fathi - Time Series.png",
-    imageWidth: 1200,
-    imageHeight: 800,
-    platform: "Kaggle",
+    imageWidth: 4800,
+    imageHeight: 2960,
+    platform: "Kaggle Learn",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-    skills: ["Forecasting", "Time Series Features", "Anomaly Detection", "Validation"],
-    brief:
-      "Developed practical time-series modeling skills: feature preparation, forecasting strategies, and robust model validation for temporal data.",
+    skills: ["Trend", "Seasonality", "Forecasting", "Hybrid Models"],
+    brief: "Trend, seasonality and forecasting with machine learning and hybrid models.",
   },
   {
     id: "ieee",
-    title: "IEEE ",
+    title: "IEEE Volunteering",
     image: "/certificates/IEEE Certificate.jpeg",
-    imageWidth: 1200,
-    imageHeight: 800,
-    platform: "IEEE",
+    imageWidth: 877,
+    imageHeight: 620,
+    platform: "IEEE Benha University Student Branch",
     link: "https://drive.google.com/file/d/1sMv03TTz0IQSeAaCdvyyKYXt9Jtoi5OS/view",
-    skills: ["Professional Development", "Engineering Concepts", "Technical Communication"],
+    skills: ["Event Organisation", "Teamwork"],
     brief:
-      "An IEEE-backed credential focused on strengthening engineering knowledge and professional practice through structured learning.",
+      "Volunteer on the Events Team (2019–2020), helping organise the branch's technical events and activities.",
   },
 ];
-
-/** Exported for preloading certificate images from the main page. */
-export const CERTIFICATE_IMAGE_URLS = certificates.map((c) => c.image);
 
 const FolderIcon = () => (
   <svg width="80" height="80" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
@@ -325,7 +338,7 @@ function CertificateImage({ cert }: { cert: Certificate }) {
       className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#91010F]"
       aria-label={`View ${cert.title} certificate`}
     >
-      {!imgError ? (
+      {cert.image && !imgError ? (
         <span
           className="relative inline-block w-full max-w-[420px] rounded-sm border-2 border-[#2a2a2a] overflow-hidden mx-auto align-top"
           style={{ boxShadow: "3px 3px 0 #1a1a1a", aspectRatio }}

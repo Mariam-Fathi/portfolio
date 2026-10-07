@@ -106,7 +106,6 @@ interface DotTimelineRefs {
   svgI: SVGTSpanElement;
   svgA2: SVGTSpanElement;
   svgM2: SVGTSpanElement;
-  portfolioHeaderRef?: RefObject<HTMLDivElement | null>;
 }
 interface DotTimelineCallbacks {
   onComplete: () => void;
@@ -418,20 +417,6 @@ function buildDotTimeline(
   return tl;
 }
 
-// ── Get portfolio header "O" center and bounds for exact landing position ─
-function getPortfolioOData(headerRef: RefObject<HTMLDivElement | null>): { x: number; centerY: number; top: number; width: number; height: number } | null {
-  const oEl = headerRef.current?.querySelector(".hero-o-trigger") as HTMLElement | null;
-  if (!oEl) return null;
-  const r = oEl.getBoundingClientRect();
-  return {
-    x: r.left + r.width / 2,
-    centerY: r.top + r.height / 2,
-    top: r.top,
-    width: r.width,
-    height: r.height,
-  };
-}
-
 // ── Hook ─────────────────────────────────────────────────────────────
 export function useDotAnimation(
   svgRef: RefObject<SVGSVGElement | null>,
@@ -447,7 +432,6 @@ export function useDotAnimation(
   isMariamReady: boolean,
   isMobile: boolean,
   shouldAnimate: boolean,
-  portfolioHeaderRef?: RefObject<HTMLDivElement | null>,
   onDotLandedOnI?: () => void,
 ): { isDotAnimationStarted: boolean; isDotAnimationComplete: boolean; isDotFallenFromM: boolean } {
   const [isDotStarted, setIsDotStarted] = useState(false);
@@ -479,7 +463,7 @@ export function useDotAnimation(
         gsap.set(textEl, { scaleY: 1 });
       }
     }
-  }, [isActive, dotRef, svgIRef]);
+  }, [isActive, dotRef, svgIRef, liquidDropsRef]);
 
   // ── Main animation trigger ─────────────────────────────────────
   useEffect(() => {
@@ -513,14 +497,6 @@ export function useDotAnimation(
           if (!svgIEl || !svgA2El || !svgM2El || !dotEl) return;
 
           const freshPos = calculatePositions(svgIEl, svgA2El, svgM2El);
-          const oData = portfolioHeaderRef ? getPortfolioOData(portfolioHeaderRef) : null;
-          if (oData) {
-            freshPos.oPortfolioScreenX = oData.x;
-            freshPos.oPortfolioCenterY = oData.centerY;
-            freshPos.oPortfolioTop = oData.top;
-            freshPos.oPortfolioWidth = oData.width;
-            freshPos.oPortfolioHeight = oData.height;
-          }
           setDotAtFinal(dotEl, freshPos);
           gsap.set(dotEl, { opacity: 0, filter: "blur(15px)" });
           gsap.to(dotEl, {
@@ -543,14 +519,6 @@ export function useDotAnimation(
 
     // ── Calculate fresh positions ────────────────────────────────
     const pos = calculatePositions(svgI, svgA2, svgM2);
-    const oData = portfolioHeaderRef ? getPortfolioOData(portfolioHeaderRef) : null;
-    if (oData) {
-      pos.oPortfolioScreenX = oData.x;
-      pos.oPortfolioCenterY = oData.centerY;
-      pos.oPortfolioTop = oData.top;
-      pos.oPortfolioWidth = oData.width;
-      pos.oPortfolioHeight = oData.height;
-    }
     // ── Mobile: dot hidden, complete; user clicks O to trigger portfolio ──
     if (isMobile) {
       const tid = setTimeout(() => {
@@ -605,7 +573,7 @@ export function useDotAnimation(
           activeTl = buildDotTimeline(
             dot,
             pos,
-            { svgI, svgA2, svgM2, portfolioHeaderRef },
+            { svgI, svgA2, svgM2 },
             {
               onComplete: () => setIsDotComplete(true),
               onDotFallenFromM: () => setIsDotFallenFromM(true),
@@ -635,7 +603,7 @@ export function useDotAnimation(
         activeTl = null;
       }
     };
-  }, [isActive, isMariamReady, isMobile, shouldAnimate, svgRef, svgIRef, svgA2Ref, svgM2Ref, dotRef, liquidDropsRef, portfolioHeaderRef]);
+  }, [isActive, isMariamReady, isMobile, shouldAnimate, svgRef, svgIRef, svgA2Ref, svgM2Ref, dotRef, liquidDropsRef, onDotLandedOnI]);
 
   // ── Resize handler — recalculate positions after Mariam re-layouts ──
   useEffect(() => {
@@ -665,14 +633,6 @@ export function useDotAnimation(
             if (!svgIEl2 || !svgA2El2 || !svgM2El2 || !dotEl2) return;
 
             const pos = calculatePositions(svgIEl2, svgA2El2, svgM2El2);
-            const oData = portfolioHeaderRef ? getPortfolioOData(portfolioHeaderRef) : null;
-            if (oData) {
-              pos.oPortfolioScreenX = oData.x;
-              pos.oPortfolioCenterY = oData.centerY;
-              pos.oPortfolioTop = oData.top;
-              pos.oPortfolioWidth = oData.width;
-              pos.oPortfolioHeight = oData.height;
-            }
             setDotAtFinal(dotEl2, pos);
             // Restore "iam" accent colors in case they were cleared on mobile
             colorLetters(svgIEl2, svgA2El2, svgM2El2);
@@ -686,7 +646,7 @@ export function useDotAnimation(
       window.removeEventListener("resize", handleResize);
       if (resizeTimer) clearTimeout(resizeTimer);
     };
-  }, [isActive, isMariamReady, svgIRef, svgA2Ref, svgM2Ref, dotRef, portfolioHeaderRef]);
+  }, [isActive, isMariamReady, svgIRef, svgA2Ref, svgM2Ref, dotRef]);
 
   return { isDotAnimationStarted: isDotStarted, isDotAnimationComplete: isDotComplete, isDotFallenFromM };
 }

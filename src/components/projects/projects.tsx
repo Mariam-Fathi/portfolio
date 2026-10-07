@@ -43,121 +43,108 @@ const FileIcon = ({ ext }: { ext?: string }) => (
 
 const projects: Project[] = [
   {
-    id: "kai-app",
-    title: "Kai",
-    role: "Full-Stack Engineer",
+    id: "personality-analysis",
+    title: "Personality Analysis",
+    role: "Graduation Project (Grade: Excellent)",
     description:
-      "Kai is a production full-stack web app for a structured 60-day, voice-first English speaking program aimed at learners who over-rely on translation. The curriculum spans eight themed weeks: weeks 1–4 use blocked practice (deep repetition on one concept per week), and weeks 5–8 shift to interleaved practice that mixes prior chunks in new contexts for durable retrieval. Each ~15-minute daily session runs four timed phases—chunk drilling (explicit instruction and multi-context practice), the 4/3/2 technique (same topic repeated three times with decreasing time limits, scaled by week), open production scenarios with direct native-model feedback, and a short wrap with a concrete takeaway and rehearsal cue. The AI coach (Google Gemini) is invoked only from a server-side `/api/kai` route with configurable model selection, automatic fallback across model IDs, and retry handling for rate limits—keeping API keys off the client. The client parses structured coach signals to maintain phrase memory with spaced repetition (1/3/7/14/30-day intervals), tracks per-phrase recall and misses, and persists day index, session date, and memory in localStorage, with a one-session-per-day design. Users can speak via the Web Speech API (browser speech recognition) or type; assistant replies are read aloud with speech synthesis, with phase progression, elapsed time, and multi-bar progress UI throughout. Built with React Router 7 (SSR-capable stack), Vite, TypeScript, and Tailwind CSS v4; deployed on Vercel.",
+      "A multimodal deep learning system that predicts a job candidate's Big Five personality traits from a 15-second interview video, built in a team of 6 on the ChaLearn First Impressions V2 benchmark (CVPR 2017, 10,000 videos). My parts were the emotion-based video model and the multimodal fusion. I designed an unsupervised video summarization pipeline (Haar Cascade, VGG-Face embeddings, K-means with silhouette analysis) to keep only representative key frames. I built emotion features with DeepFace, diagnosed an imbalanced-regression problem (85% of labels between 0.3 and 0.7) and oversampled rare label ranges in the training data, cutting the model's MAE from 0.112 to 0.061. I benchmarked XGBoost, an RBF network and TabNet with 4-fold cross-validation and Optuna, and stacked the best two with an SVR meta-learner. Finally, I built the late-fusion stage: per-trait models over the video, audio and text predictions, comparing linear SVR, Random Forest and XGBoost, with XGBoost giving the system's final MAE of 0.127 across the five traits.",
     links: [
-      { name: "Live", url: "https://kai-app-six.vercel.app/" },
+      { name: "Thesis", url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view" },
+      { name: "GitHub", url: "https://github.com/Mariam-Fathi/multimodal-personality-analysis" },
     ],
-  },
-  {
-    id: "sales-ai",
-    title: "Estima",
-    role: "Full-Stack Engineer",
-    description: "Built a full-stack Next.js 15 app that turns project briefs into cost and timeline estimates using Google Gemini 2.5 Flash Lite. Implemented structured AI prompts (complexity scores, effort multipliers, risk factors), rule-based fallback when the API is unavailable, multi-department configs (tech stack, team size, hourly rates), and EGP/USD conversion. Delivered landing page, estimation wizard, results breakdown with confidence and risks, and download estimation as JSON for sharing or records. UI built with Radix UI and Framer Motion for founders and agencies.",
-    links: [
-      { name: "Live", url: "https://ai-saas-app-nu-nine.vercel.app" },
-    ],
-  },
-  {
-    id: "font-selection-agent",
-    title: "Font Agent",
-    role: "AI Engineer",
-    description:
-      "Agents Intensive Capstone: AI agent that automates font discovery and visual comparison for any UI file (HTML, React, Vue, Angular). Reduces font-selection time by 95% and evaluates 10× more fonts in the same time. Prompts for file path and URL, offers five curated categories (handwriting, serif, sans-serif, display, monospace) across 40 Google Fonts, then chains search and Playwright-based screenshot capture with automatic file modification and restoration. Built with Google ADK, Gemini 2.5 Flash Lite, and a safe file pipeline (regex-based pattern matching, CSS injection, 100% restoration). Delivers side-by-side previews for confident typography decisions.",
-    links: [
-      { name: "GitHub", url: "https://github.com/Mariam-Fathi/font-selection-agent" },
-      {
-        name: "Kaggle Capstone Writeup",
-        url: "https://www.kaggle.com/competitions/agents-intensive-capstone-project/writeups/new-writeup-1763196957997",
-      },
-    ],
-  },
-  {
-    id: "real-estate-data",
-    title: "Data Auditing",
-    role: "Data Engineer",
-    description:
-      "Data engineering on the USA Real Estate Dataset (2.2M+ records). Exploratory analysis revealed critical integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Built memory-optimized auditing pipelines achieving 87.4% memory reduction and documented 57k suspicious patterns. Delivered discovery analysis, anomaly detection, and data quality visuals as reproducible Kaggle notebooks.",
-    links: [
-      { name: "Kaggle Notebooks: [1], [2], [3], [4]", url: "#", isGrouped: true, groupedLinks: [
-        { name: "Real Estate Data Discovery Analysis", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-discovery-analysis" },
-        { name: "38.19% SUSPICIOUS RECORDS", url: "https://www.kaggle.com/code/mariamfathiamin/38-19-suspicious-records" },
-        { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "https://www.kaggle.com/code/mariamfathiamin/87-4-memory-opt-real-estate-suspicious-patterns" },
-        { name: "87.4% Memory Opt + Real Estate Data Quality Visuals", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-quality-visuals" },
-      ]},
-    ],
-  },
-  {
-    id: "operational-portal",
-    title: "Operational Portal",
-    role: "Full-Stack Engineer",
-    description: "Built a real-time React dashboard for monitoring room devices with Appwrite as backend and Appwrite Realtime for live updates. Implemented Dashboard (search, filters by device/status/battery, pagination, summary stats), Manage Devices (full CRUD), and Analytics (Recharts pie/bar charts). Added critical-event detection, in-app notification panel, and optional WhatsApp alerts (Twilio/Green API/Evolution API) for device failures and low battery. Delivered sample-data import script and responsive UI with Tailwind.",
-    links: [
-      { name: "Live", url: "https://operational-portal.vercel.app/" },
-    ],
-  },
-  {
-    id: "shibin-ride",
-    title: "Shibin Ride",
-    role: "Full-Stack Engineer",
-    description:
-      "Designed and built a full-stack bus booking platform inspired by Swvl, tailored for local Egyptian routes. Engineered a PostgreSQL schema on Supabase covering trips, seat reservations, waitlists, ratings, and push notifications — with race condition protection using FOR UPDATE locks to guarantee no overbooking. Implemented three pg_cron background jobs for automatic trip completion, 30-minute departure reminders, and waitlist seat notifications. Built two Supabase Edge Functions for push delivery via Expo and atomic trip cancellation with passenger notifications. Architected the full booking lifecycle (confirmed → completed) without per-passenger check-in, matching real driver workflows. Stack: Supabase (PostgreSQL, pg_cron, Edge Functions, RLS), Expo Push Notifications.",
-    links: [],
   },
   {
     id: "homi",
     title: "Homi",
-    role: "Full-Stack Engineer",
+    role: "Product Analytics & Experimentation Case Study",
     description:
-      "Full-stack mobile property marketplace (React Native / Expo) shipped on the Play Store. Users sign in securely with AppWrite OAuth, search and filter properties, browse rich listing details, and complete payment flows with Stripe; Firebase powers push notifications so they stay updated on new homes, price changes, and status updates. Stack: Expo (Router, typed routes, EAS updates), NativeWind for UI, react-native-appwrite and @stripe/stripe-react-native for auth and payments, with OTA updates for fast iteration. Delivered a production-ready, cross-platform app focused on making it easy to find and secure the right home from a phone.",
+      "A real-estate app I rebuilt end to end to answer three product questions with my own data pipeline, statistics and models. Every analysis was checked against simulated users with known, planted effects. Full stack: a React Native app, a FastAPI and PostgreSQL backend, and event tracking (a 21-event tracking plan, offline-safe client and server-side outcome recording), covered by 158 automated tests in CI. Funnel analytics: a SQL data model and a Streamlit dashboard, where a per-stage segment diagnosis recovered every planted problem across six random seeds. A/B testing: a pre-registered experiment with power analysis and simulation-checked error rates (4.7% false positives, 79.5% power); formatting the phone field raised viewing requests by 9.1 points (95% CI +2.7 to +15.6). Recommender: five models compared offline (NDCG, bootstrap confidence intervals) and in a three-arm online test, where the best offline model cut recommendation opens by 43%, showing why offline metrics alone can mislead.",
     links: [
-      { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.mariamfathi.homi" },
-    ],
-  },
-  {
-    id: "personality-ai",
-    title: "Personality Analysis",
-    role: "AI Researcher / Machine Learning Engineer",
-    description: "Bachelor project (Computer Systems Engineering). Engineered an end-to-end system predicting Big Five traits from short videos using computer vision (facial action units), audio (PyAudioAnalysis), and NLP (BERT) on First Impressions V2 (10K videos), with LSTNet and XGBoost late fusion (MAE 0.0489). Built a full-stack Node.js/Express/MongoDB app with secure auth, upload pipeline, admin dashboard, and radar-chart visualization.",
-    links: [
-      { name: "Graduation Thesis", url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view" },
-      { name: "GitHub", url: "https://github.com/Mariam-Fathi/multimodal-personality-analysis.git" },
-    ],
-  },
-  {
-    id: "sanayat",
-    title: "Sanayat",
-    role: "Mobile Engineer",
-    description: "As the mobile engineer on Sanayat, an on-demand handyman platform, I designed and built both client applications from the ground up. The Customer App enables users to discover handymen, create broadcast or direct bookings, track jobs in real time, chat with providers, complete payments, and manage wallet and reviews. The Handyman App gives providers a job feed with bidding and direct/scheduled requests, availability and calendar management, verification onboarding, in-app chat and location sharing, wallet and payouts, and a referral program. Both apps are built with Expo and React Native in a TypeScript monorepo, sharing types and i18n (English and Arabic) with the backend, and use NativeWind, React Query, and Zustand for a consistent, maintainable codebase. The result is a production-ready, two-sided marketplace experience with end-to-end flows for booking, payment, and communication.",
-    links: [
-      // { name: "GitHub", url: "#" },
+      { name: "GitHub", url: "https://github.com/Mariam-Fathi/homi" },
+      { name: "Project summary", url: "https://github.com/Mariam-Fathi/homi/blob/master/docs/summary.md" },
+      { name: "Google Play (v1)", url: "https://play.google.com/store/apps/details?id=com.mariamfathi.homi" },
     ],
   },
   {
     id: "smart-key",
     title: "Smart Key",
-    role: "Mobile Engineer",
+    role: "Software Engineer at Tarqia",
     description:
-      "Production-deployed IoT solution replacing key cards with smartphone-based access control. Delivered cross-platform React Native applications for guests and staff, enabling secure and seamless keyless access across all properties. Successfully deployed at enterprise level, transforming the complete guest journey from reservation to checkout with modern mobile-first authentication technology.",
+      "An IoT hotel access platform. I led development of the admin web portal: room access control, hotel hierarchy, housekeeping schedules, inventory import and role-based permissions. I created the housekeeping staff mobile app for room status tracking and unlocking, and engineered a desktop bridge between the portal and an NFC card encoder, so staff can write key cards from the browser.",
     links: [
-      { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.smartkeylb" },
-      { name: "App Store", url: "https://apps.apple.com/eg/app/smartkeylb/id6753882015" },
+      { name: "Housekeeping app – Google Play", url: "https://play.google.com/store/apps/details?id=com.housekeepingapp" },
+      { name: "Housekeeping app – App Store", url: "https://apps.apple.com/us/app/housekeepinglbr/id6755960728" },
     ],
   },
   {
-    id: "wheelchair-dashboard",
-    title: "Wheelchair",
-    role: "Frontend Engineer",
-    description: "Developed a secure, multilingual (EN/AR/UR) React/TypeScript admin dashboard for wheelchair service operations. Delivered full CRUD for contracted partners, assets, services, and pricing; real-time dashboard with KPIs and maps; trip tracking and detail views; JWT auth, RBAC-ready flows, and CSV/PDF export. Integrated REST APIs, TanStack Query, Tailwind CSS, and Google Maps in a responsive, RTL-capable SPA.",
+    id: "smart-wheelchair",
+    title: "Smart Wheelchair",
+    role: "Software Engineer at Tarqia",
+    description:
+      "An IoT wheelchair rental system. I delivered the trip flow of the guest mobile app (maps, QR check-in and live trip tracking) and the handover check in the staff app, and set up the admin web app with a reusable entity-management page shared across list pages.",
     links: [
-      // { name: "Demo", url: "#" },
+      { name: "Guest app – Google Play", url: "https://play.google.com/store/apps/details?id=com.wheelchairuser" },
+      { name: "Staff app – Google Play", url: "https://play.google.com/store/apps/details?id=com.wheelchairstaff" },
+      { name: "Staff app – App Store", url: "https://apps.apple.com/us/app/efadgo-staff/id6760079644" },
     ],
   },
-
-
+  {
+    id: "fire-crm",
+    title: "Fire CRM",
+    role: "Frontend Engineer (Freelance)",
+    description:
+      "Dracode's enterprise CRM product. I built the Next.js frontend: 360° customer profiles, a drag-and-drop sales pipeline with forecasting, workflow automation, real-time analytics dashboards, milestone and deadline tracking, and Google Workspace integration.",
+    links: [
+      { name: "Product site", url: "https://fire.dracode.org/" },
+    ],
+  },
+  {
+    id: "sanae3y-pro",
+    title: "Sanae3y Pro",
+    role: "Mobile Engineer (Freelance)",
+    description:
+      "A home services mobile app where customers post a job and technicians send offers. I developed the app with real-time offers over WebSocket, map-based job posting, price negotiation, live technician tracking and Arabic (RTL) support.",
+    links: [
+      { name: "Google Play", url: "https://play.google.com/store/apps/details?id=com.blink.sanae3ypro" },
+      { name: "App Store", url: "https://apps.apple.com/us/app/sanae3y-pro-%D8%B5%D9%86%D8%A7%D9%8A%D8%B9%D9%8A-%D8%A8%D8%B1%D9%88/id6774985991" },
+    ],
+  },
+  {
+    id: "real-estate-data",
+    title: "Data Quality Audit",
+    role: "Data Analysis (Kaggle)",
+    description:
+      "A 4-part notebook series on 2.2 million US real estate listings. I profiled completeness (90.1% overall, with 4 columns over 20% missing), found 115,000 inconsistent duplicate records (5.2%) and traced where they cluster by state, broker and year, and cut the dataset's memory use by 87.4% (668 MB to 84 MB) through data-type optimisation.",
+    links: [
+      { name: "Kaggle Notebooks", url: "#", isGrouped: true, groupedLinks: [
+        { name: "Real Estate Data Discovery Analysis", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-discovery-analysis" },
+        { name: "38.19% Suspicious Records", url: "https://www.kaggle.com/code/mariamfathiamin/38-19-suspicious-records" },
+        { name: "87.4% Memory Opt + Suspicious Patterns", url: "https://www.kaggle.com/code/mariamfathiamin/87-4-memory-opt-real-estate-suspicious-patterns" },
+        { name: "Real Estate Data Quality Visuals", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-quality-visuals" },
+      ]},
+    ],
+  },
+  {
+    id: "rfm-segmentation",
+    title: "Customer Segmentation",
+    role: "Data Analysis (Kaggle)",
+    description:
+      "Customer segmentation of an online retail dataset (540,000 transactions, 4,339 customers). I segmented customers by recency, frequency and monetary value (RFM) and compared 5 clustering methods (K-Means, GMM, DBSCAN, BIRCH, Agglomerative); K-Means performed best (silhouette score 0.645).",
+    links: [
+      { name: "Kaggle", url: "https://www.kaggle.com/code/mariamfathiamin/uk-online-retail-rfm-clustering-formats-comparison" },
+    ],
+  },
+  {
+    id: "font-selection-agent",
+    title: "Font Agent",
+    role: "Kaggle AI Agents Capstone",
+    description:
+      "Capstone project for the Kaggle 5-Day AI Agents Intensive with Google. I built an AI agent with Google ADK and Gemini that helps developers pick a font: it asks about the project and style, searches a list of Google Fonts and shows the options side by side. I wrote Python tools that open the user's own page in a browser with Playwright, apply each font, take a screenshot and then restore the original file.",
+    links: [
+      { name: "Writeup", url: "https://www.kaggle.com/competitions/agents-intensive-capstone-project/writeups/new-writeup-1763196957997" },
+      { name: "GitHub", url: "https://github.com/Mariam-Fathi/font-selection-agent" },
+    ],
+  },
 ];
 
 // Match hero — same program, same palette.

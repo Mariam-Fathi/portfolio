@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 import { BREAKPOINTS } from "../constants";
 
 /**
@@ -12,17 +12,11 @@ export function useHeroBreakpoints(): {
   isMd: boolean;
   isSm: boolean;
 } {
-  const [state, setState] = useState(() => {
-    if (typeof window === "undefined") return { isLg: false, isMd: false, isSm: false };
-    const w = window.innerWidth;
-    return {
-      isLg: w >= BREAKPOINTS.lg,
-      isMd: w >= BREAKPOINTS.md && w < BREAKPOINTS.lg,
-      isSm: w < BREAKPOINTS.md,
-    };
-  });
+  // Start with the server value so hydration matches; the layout effect
+  // syncs to the real viewport before the first paint.
+  const [state, setState] = useState({ isLg: false, isMd: false, isSm: false });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const update = () => {
       const w = window.innerWidth;
       setState({

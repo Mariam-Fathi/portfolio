@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 import { BREAKPOINTS } from "../constants";
 
 /**
@@ -7,15 +7,11 @@ import { BREAKPOINTS } from "../constants";
  * once per threshold crossing, not on every pixel of resize.
  */
 export function useIsMobile(breakpoint: number = BREAKPOINTS.md): boolean {
-  // Lazy initializer reads the real viewport on first render (client only).
-  // Falls back to false during SSR so the server render always matches the
-  // "desktop" default — the effect below corrects it before first paint.
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.innerWidth <= breakpoint;
-  });
+  // Start with the server value (false) so hydration matches, then sync to the
+  // real viewport in a layout effect, which runs before the first paint.
+  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
     // Sync in case the breakpoint prop changed between renders
     setIsMobile(mql.matches);

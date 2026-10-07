@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import localFont from "next/font/local";
 import gsap from "gsap";
-import { COLORS, FONTS, SKIP_PORTFOLIO_ANIMATION, Z_LAYERS } from "./constants";
+import { COLORS, FONTS, Z_LAYERS } from "./constants";
 
 const pouitiesFont = localFont({
   src: "../../../public/fonts/pouities/Pouities.ttf",
@@ -17,60 +17,24 @@ import { useHeroBreakpoints } from "./hooks/useHeroBreakpoints";
 import { useMariamSvg } from "./hooks/useMariamSvg";
 import { hasDotAnimationEverCompleted, resetDotCache, useDotAnimation } from "./hooks/useDotAnimation";
 import { usePortfolWidth } from "./hooks/usePortfolWidth";
-import { usePortfolioAnimation } from "./hooks/usePortfolioAnimation";
 import { useEngineerText } from "./hooks/useEngineerText";
 import HeroContactsPanel from "./HeroContactsPanel";
-import HeroExperiencePanel from "./HeroExperiencePanel";
+import HeroAboutPanel from "./HeroAboutPanel";
 
 const Hero: React.FC<HeroProps> = ({
   onNavigate,
   onReady,
   isActive = true,
-  portfolioCache: portfolioCacheProp,
 }) => {
-  const isHeroDebugEnabled = useMemo(
-    () => () =>
-      typeof window !== "undefined" &&
-      (
-        // Auto-enable while debugging on localhost/dev.
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1" ||
-        window.location.search.includes("heroDebug=1") ||
-        window.localStorage.getItem("heroDebug") === "1" ||
-        (window as Window & { __HERO_DEBUG__?: boolean }).__HERO_DEBUG__ === true
-      ),
-    [],
-  );
-
-  const debugHero = useCallback(
-    (event: string, payload: Record<string, unknown>) => {
-      if (!isHeroDebugEnabled()) return;
-      console.log(`[hero] ${event} ${JSON.stringify(payload)}`);
-    },
-    [isHeroDebugEnabled],
-  );
-
-  useEffect(() => {
-    debugHero("debug:enabled", {
-      hostname: typeof window !== "undefined" ? window.location.hostname : "n/a",
-      href: typeof window !== "undefined" ? window.location.href : "n/a",
-    });
-  }, [debugHero]);
-
   // ── Refs ──────────────────────────────────────────────────────────
   const portfolioHeaderRef = useRef<HTMLDivElement>(null);
   const numberSevenRef = useRef<SVGSVGElement>(null);
-  const svgMariamTextRef = useRef<SVGTextElement>(null);
-  const svgMRef = useRef<SVGTSpanElement>(null);
-  const svgA1Ref = useRef<SVGTSpanElement>(null);
-  const svgRRef = useRef<SVGTSpanElement>(null);
   const svgIRef = useRef<SVGTSpanElement>(null);
   const svgA2Ref = useRef<SVGTSpanElement>(null);
   const svgM2Ref = useRef<SVGTSpanElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const liquidDropsRef = useRef<HTMLDivElement>(null);
   const engineerTextRef = useRef<HTMLDivElement>(null);
-  const oDragWrapperRef = useRef<HTMLSpanElement>(null);
   const dotClickSvgRef = useRef<SVGSVGElement>(null);
   const dotClickTlRef = useRef<gsap.core.Timeline | null>(null);
 
@@ -91,7 +55,7 @@ const Hero: React.FC<HeroProps> = ({
   const prevIsLgInitializedRef = useRef<boolean>(false);
 
   const isMobile = useIsMobile();
-  const { isLg, isMd, isSm } = useHeroBreakpoints();
+  const { isLg, isSm } = useHeroBreakpoints();
 
   // ── Mount ─────────────────────────────────────────────────────────
   useEffect(() => setIsMounted(true), []);
@@ -181,20 +145,7 @@ const Hero: React.FC<HeroProps> = ({
     isMariamReady,
     isMobile,
     isMounted && (isSm ? portfolioRevealReady : isDotClicked),
-    portfolioHeaderRef,
     onDotLandedOnI,
-  );
-
-  usePortfolioAnimation(
-    portfolioHeaderRef,
-    isActive && isMariamReady,
-    isActive,
-    isMobile,
-    undefined,
-    oDragWrapperRef as React.RefObject<HTMLDivElement | null>,
-    portfolioRevealReady || isDotAnimationComplete,
-    SKIP_PORTFOLIO_ANIMATION || isMd,
-    portfolioCacheProp,
   );
 
   const engineerRevealActive =
@@ -205,54 +156,6 @@ const Hero: React.FC<HeroProps> = ({
         ? isDotAnimationComplete
         : portfolioRevealReady || isDotAnimationComplete);
 
-  useEffect(() => {
-    debugHero("engineerRevealActive:changed", {
-      isLg,
-      isMd,
-      isSm,
-      isMounted,
-      isMariamReady,
-      portfolioRevealReady,
-      dotLandedOnI,
-      isDotAnimationComplete,
-      hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
-      isDotClicked,
-      engineerRevealActive,
-    });
-  }, [
-    debugHero,
-    isLg,
-    isMd,
-    isSm,
-    isMounted,
-    isMariamReady,
-    portfolioRevealReady,
-    dotLandedOnI,
-    isDotAnimationComplete,
-    isDotClicked,
-    engineerRevealActive,
-  ]);
-
-  useEffect(() => {
-    if (!isHeroDebugEnabled()) return;
-    const onResize = () => {
-      debugHero("window:resize", {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        isLg,
-        isMd,
-        isSm,
-        isDotClicked,
-        dotLandedOnI,
-        isDotAnimationComplete,
-        hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
-        engineerRevealActive,
-      });
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [isLg, isMd, isSm, isDotClicked, dotLandedOnI, isDotAnimationComplete, engineerRevealActive, isHeroDebugEnabled, debugHero]);
-
   useEngineerText(
     engineerTextRef,
     numberSevenRef,
@@ -262,7 +165,6 @@ const Hero: React.FC<HeroProps> = ({
     engineerRevealActive,
     isMariamReady,
     isMobile,
-    useCallback(() => {}, []),
   );
 
   // ── Dot click position ────────────────────────────────────────────
@@ -442,29 +344,7 @@ const Hero: React.FC<HeroProps> = ({
             <div className="hero-window-title-inner">
               <div className="hero-cover-header hero-cover-header-in-title-bar">
                 <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
-                  {SKIP_PORTFOLIO_ANIMATION ? (
-                    <span className="hero-cover-title-whole" aria-label="Portfolio">PORTFOLIO</span>
-                  ) : (isMd || isSm) ? (
-                    <>
-                      <span className="hero-cover-title-portfoli hero-cover-title-portfoli-hidden" aria-hidden="true">PORTFOLI</span>
-                      <span className="hero-cover-title-full-sm" aria-label="Portfolio">PORTFOLIO</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="hero-cover-title-full" aria-label="Portfolio">
-                        {"PORTFOLI"}<span className="hero-o-trigger" aria-hidden="true">{"O"}</span>
-                      </span>
-                      <span className="hero-cover-title-portfoli" style={{ display: "none" }} aria-hidden="true">PORTFOLI</span>
-                      <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-                        <span className="hero-cover-title-o" style={{ display: "none", opacity: 1, position: "relative" }} aria-label="Drag to expand navigation">O</span>
-                      </span>
-                      <div
-                        className="hero-cover-title-line"
-                        style={{ display: "none", height: "1px", backgroundColor: COLORS.line, opacity: 0.4, position: "absolute", top: "50%", transform: "translateY(-50%)" }}
-                        aria-hidden="true"
-                      />
-                    </>
-                  )}
+                  <span className="hero-cover-title-whole" aria-label="Portfolio">PORTFOLIO</span>
                 </div>
               </div>
 
@@ -510,9 +390,9 @@ const Hero: React.FC<HeroProps> = ({
             <div className="app-window-content-frame">
               <div className="hero-inner-grid">
 
-                {/* Top-right: Experience */}
-                <div className="hero-experience-panel-wrap">
-                  <HeroExperiencePanel />
+                {/* Top-right: About me */}
+                <div className="hero-about-panel-wrap">
+                  <HeroAboutPanel />
                 </div>
 
                 {/* Bottom-left: Contacts */}
@@ -530,7 +410,7 @@ const Hero: React.FC<HeroProps> = ({
                         style={{ zIndex: Z_LAYERS.mariamSvg, pointerEvents: "none", margin: 0, padding: 0 }}
                       >
                         <text
-                          ref={svgMariamTextRef}
+                         
                           className="hero-mariam-text"
                           x="0"
                           y="0"
@@ -540,9 +420,9 @@ const Hero: React.FC<HeroProps> = ({
                           dominantBaseline="hanging"
                           style={{ letterSpacing: "0" }}
                         >
-                          <tspan ref={svgMRef}>M</tspan>
-                          <tspan ref={svgA1Ref}>a</tspan>
-                          <tspan ref={svgRRef}>r</tspan>
+                          <tspan>M</tspan>
+                          <tspan>a</tspan>
+                          <tspan>r</tspan>
                           <tspan ref={svgIRef}>ı</tspan>
                           <tspan ref={svgA2Ref}>a</tspan>
                           <tspan ref={svgM2Ref}>m</tspan>
@@ -559,10 +439,10 @@ const Hero: React.FC<HeroProps> = ({
                     style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 1, height: 1, overflow: "hidden" }}
                     aria-hidden="true"
                   >
-                    <text ref={svgMariamTextRef} className="hero-mariam-text">
-                      <tspan ref={svgMRef}>M</tspan>
-                      <tspan ref={svgA1Ref}>a</tspan>
-                      <tspan ref={svgRRef}>r</tspan>
+                    <text className="hero-mariam-text">
+                      <tspan>M</tspan>
+                      <tspan>a</tspan>
+                      <tspan>r</tspan>
                       <tspan ref={svgIRef}>ı</tspan>
                       <tspan ref={svgA2Ref}>a</tspan>
                       <tspan ref={svgM2Ref}>m</tspan>
@@ -840,31 +720,6 @@ const Hero: React.FC<HeroProps> = ({
             height: clamp(42px, 11vw, 60px);
           }
         }
-        .hero-window-title-bar .hero-cover-title-full,
-        .hero-window-title-bar .hero-cover-title-portfoli,
-        .hero-window-title-bar .hero-cover-title-o {
-          font-size: clamp(1.5rem, 4.5vw, 3.25rem);
-          letter-spacing: 0.12em;
-          height: clamp(40px, 5vw, 56px);
-          color: ${COLORS.primary};
-          font-family: ${FONTS.display};
-        }
-        .hero-window-title-bar .hero-cover-title-full-sm {
-          font-size: clamp(1.25rem, 5vw, 2.5rem);
-          letter-spacing: 0.15em;
-          height: clamp(36px, 10vw, 52px);
-          color: ${COLORS.primary};
-          font-family: ${FONTS.display};
-        }
-        @media (max-width: 768px) {
-          .hero-window-title-bar .hero-cover-title-full,
-          .hero-window-title-bar .hero-cover-title-portfoli,
-          .hero-window-title-bar .hero-cover-title-o {
-            font-size: clamp(1.25rem, 5vw, 2.5rem);
-            height: clamp(36px, 10vw, 52px);
-          }
-        }
-
         /* Nav */
         .hero-window-title-nav {
           flex: 0 0 auto;
@@ -1053,7 +908,7 @@ const Hero: React.FC<HeroProps> = ({
           align-content: stretch;
         }
 
-        .hero-experience-panel-wrap {
+        .hero-about-panel-wrap {
           grid-area: experience;
           justify-self: end;
           align-self: start;
@@ -1145,7 +1000,7 @@ const Hero: React.FC<HeroProps> = ({
             min-height: 0;
             overflow: visible;
           }
-          .hero-experience-panel-wrap {
+          .hero-about-panel-wrap {
             margin-top: 0;
             flex-shrink: 0;
             width: 100%;
@@ -1181,70 +1036,6 @@ const Hero: React.FC<HeroProps> = ({
           position: relative;
           overflow: visible;
         }
-        .hero-cover-title-full,
-        .hero-cover-title-portfoli,
-        .hero-cover-title-o {
-          font-size: clamp(1.9rem, 5.6vw, 4.25rem);
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          color: ${COLORS.primary};
-          font-family: ${pouitiesFont.style.fontFamily};
-          line-height: 1;
-          display: inline-flex;
-          align-items: center;
-          white-space: nowrap;
-          height: clamp(60px, 8vw, 100px);
-        }
-        @media (max-width: 768px) {
-          .hero-cover-title-full,
-          .hero-cover-title-portfoli,
-          .hero-cover-title-o {
-            font-size: clamp(1.5rem, 6vw, 3rem);
-            height: clamp(50px, 12vw, 80px);
-          }
-        }
-        .hero-cover-title-o { will-change: transform; }
-        .hero-o-drag-wrapper { touch-action: none; }
-        .hero-cover-title-line {
-          will-change: width, transform;
-          transform-origin: left center;
-          position: absolute;
-          height: 1px;
-          background-color: ${COLORS.line};
-          opacity: 0.4;
-          top: 50%;
-          transform: translateY(-50%);
-          left: 0;
-        }
-        .hero-cover-title-portfoli-hidden {
-          position: absolute;
-          left: -9999px;
-          top: 0;
-          visibility: hidden;
-          pointer-events: none;
-          display: inline;
-        }
-        .hero-cover-title-full-sm {
-          font-size: clamp(1.5rem, 6vw, 3rem);
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          color: ${COLORS.primary};
-          font-family: ${pouitiesFont.style.fontFamily};
-          line-height: 1;
-          display: inline-flex;
-          align-items: center;
-          height: clamp(50px, 12vw, 80px);
-          flex: 1;
-          min-width: 0;
-        }
-        .hero-o-trigger {
-          position: relative;
-          cursor: pointer;
-          display: inline;
-          pointer-events: auto;
-          outline: none;
-        }
-
         /* ── Engineer text ────────────────────────────────────── */
         :global(.hero-engineer-text) {
           color: ${COLORS.primary};

@@ -25,21 +25,6 @@ function getWidthRatio(el: HTMLDivElement): number {
   return cachedWidthRatio ?? 1;
 }
 
-const isHeroDebugEnabled = () =>
-  typeof window !== "undefined" &&
-  (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1" ||
-    window.location.search.includes("heroDebug=1") ||
-    window.localStorage.getItem("heroDebug") === "1" ||
-    (window as Window & { __HERO_DEBUG__?: boolean }).__HERO_DEBUG__ === true
-  );
-
-const debugEngineer = (event: string, payload: Record<string, unknown>) => {
-  if (!isHeroDebugEnabled()) return;
-  console.log(`[hero:engineer] ${event} ${JSON.stringify(payload)}`);
-};
-
 /**
  * Animates the "Software Engineer" text with a write-on (clip reveal) effect
  * and positions it dynamically above the "ıam" portion of "Mariam".
@@ -69,11 +54,12 @@ export function useEngineerText(
   // ── Always kill tweens on cleanup, regardless of which branch ran ──
   // Separate effect so the cleanup always registers even when the reveal
   // effect exits early (mobile path, cache-hit path, !startEngineerReveal).
+  // Uses the class selector because React detaches the ref before unmount cleanup runs.
   useEffect(() => {
     return () => {
-      if (engineerRef.current) gsap.killTweensOf(engineerRef.current);
+      gsap.killTweensOf(".hero-engineer-text");
     };
-  }, [engineerRef]);
+  }, []);
 
   // ── When reveal is not active, hide the text — but only if the text
   // was never fully shown yet. Once engineerTextEverShown is true we must
@@ -100,12 +86,6 @@ export function useEngineerText(
     const el = engineerRef.current;
     if (!el) return;
     if (isMobileViewport) return;
-    debugEngineer("revealActive:ensureVisible", {
-      startEngineerReveal,
-      isMariamReady,
-      engineerTextEverShown,
-      hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
-    });
     // Immediate: ensure opacity 1
     requestAnimationFrame(() => {
       if (engineerRef.current) gsap.set(engineerRef.current, { opacity: 1, visibility: "visible" });
@@ -127,10 +107,6 @@ export function useEngineerText(
     if (isMobileViewport) return;
     const el = engineerRef.current;
     if (!el) return;
-    const iEl = svgIRef.current;
-    const a2El = svgA2Ref.current;
-    const m2El = svgM2Ref.current;
-
     // Only force desktop restore after the reveal already happened.
     // Do NOT run this during first write-on, otherwise it cancels the typing effect.
     const shouldRestoreVisible =
@@ -190,20 +166,6 @@ export function useEngineerText(
       requestAnimationFrame(applyDesktopPosition);
     }, 250);
 
-    debugEngineer("desktop:hardRestoreVisible", {
-      isMobileViewport,
-      startEngineerReveal,
-      engineerTextEverShown,
-      hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
-      opacity: getComputedStyle(el).opacity,
-      visibility: getComputedStyle(el).visibility,
-      clipPath: getComputedStyle(el).clipPath,
-      hasIRef: !!iEl,
-      hasA2Ref: !!a2El,
-      hasM2Ref: !!m2El,
-      top: el.style.top,
-      left: el.style.left,
-    });
     return () => clearTimeout(t);
   }, [isMobileViewport, isMariamReady, startEngineerReveal, engineerRef, svgIRef, svgA2Ref, svgM2Ref]);
 
@@ -220,13 +182,6 @@ export function useEngineerText(
 
     if (!startEngineerReveal) return;
     const isMobile = checkIsMobile();
-    debugEngineer("writeOn:effectStart", {
-      startEngineerReveal,
-      isMobile,
-      engineerTextEverShown,
-      hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
-      isMariamReady,
-    });
 
     // ── Mobile/sm: set final state immediately (do not set engineerTextEverShown so that
     //    if user resizes to lg and clicks the dot, they still get the write-on effect) ──
@@ -235,16 +190,10 @@ export function useEngineerText(
         const el = engineerRef.current;
         if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
         gsap.set(el, { opacity: 0, visibility: "hidden", filter: "blur(0px)", x: 0, y: 0, rotation: 0, clipPath: "none" });
-        debugEngineer("mobile:forcedVisible", {
-          opacity: getComputedStyle(el).opacity,
-          visibility: getComputedStyle(el).visibility,
-          clipPath: getComputedStyle(el).clipPath,
-        });
       }
       // If dot flow already completed, treat engineer text as permanently revealed.
       if (hasDotAnimationEverCompleted()) {
         engineerTextEverShown = true;
-        debugEngineer("mobile:markEverShownFromDotCache", { engineerTextEverShown });
       }
       onEngineerRevealComplete?.();
       return;
@@ -256,7 +205,6 @@ export function useEngineerText(
       if (el) {
         el.textContent = "Software  Engineer";
         gsap.set(el, { opacity: 0, filter: "blur(15px)", x: 0, y: 0, rotation: 0, clipPath: "none" });
-        debugEngineer("desktop:cachedPathFadeIn", { engineerTextEverShown });
         gsap.to(el, {
           opacity: 1,
           filter: "blur(0px)",
@@ -287,7 +235,6 @@ export function useEngineerText(
     });
 
     revealStartedRef.current = true;
-    debugEngineer("desktop:firstWriteOnStart", { engineerTextEverShown });
     gsap.to(el, {
       clipPath: "inset(-20% 0% -20% 0)",
       duration: 2,
@@ -296,10 +243,6 @@ export function useEngineerText(
       onComplete: () => {
         gsap.set(el, { clipPath: "none" });
         engineerTextEverShown = true;
-        debugEngineer("desktop:firstWriteOnComplete", {
-          engineerTextEverShown,
-          hasDotAnimationEverCompleted: hasDotAnimationEverCompleted(),
-        });
         onEngineerRevealComplete?.();
       },
     });
@@ -363,18 +306,6 @@ export function useEngineerText(
       if (!engineerTextEverShown && !isMobile && !writeOnInProgress) {
         gsap.set(el, { opacity: 1, clipPath: "inset(-20% 100% -20% 0)" });
       }
-      debugEngineer("position:applied", {
-        isMobile,
-        isMariamReady,
-        startEngineerReveal,
-        engineerTextEverShown,
-        writeOnInProgress,
-        top: el.style.top,
-        left: el.style.left,
-        opacity: getComputedStyle(el).opacity,
-        visibility: getComputedStyle(el).visibility,
-        clipPath: getComputedStyle(el).clipPath,
-      });
     };
 
     // Three staggered calls defend against SVG not being fully painted yet:

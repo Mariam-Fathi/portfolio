@@ -23,9 +23,9 @@ function getViewportHeight(): number {
   if (
     checkIsMobile() &&
     typeof window !== "undefined" &&
-    (window as any).visualViewport
+    window.visualViewport
   ) {
-    return (window as any).visualViewport.height;
+    return window.visualViewport.height;
   }
   return window.innerHeight;
 }
