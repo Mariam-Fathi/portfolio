@@ -174,9 +174,9 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                       color: "#280B0B",
                       textAlign: "center",
                       maxWidth: 140,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
+                      lineHeight: 1.3,
+                      textWrap: "balance",
+                      overflowWrap: "break-word",
                     }}
                     title={`portfolio / certificates / ${c.title}`}
                   >
